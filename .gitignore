@@ -1,0 +1,19 @@
+dist/
+venv/
+conf/fab_env_dev.json
+*.pyc
+*.bak
+*.txt
+messages/live/*.json
+messages/staging/*.json
+scripts/*.json
+
+// PyCharm settings folder
+.idea
+.vscode
+
+instance
+conf/*.json
+
+// Emacs
+*~
