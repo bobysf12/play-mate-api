@@ -20,10 +20,18 @@ class CommentPost(Resource):
     """docstring for Comment"""
 
     @swagger.operation(
-        notes="""Add user / registered new user""",
+        notes="""Post a comment""",
         parameters=[
             {
-                "name": "user",
+                "name": "X-SESSION-ID",
+                "description": "",
+                "required": True,
+                "allowMultiple": False,
+                "dataType": "string",
+                "paramType": "header"
+            },
+            {
+                "name": "data",
                 "description": "",
                 "required": True,
                 "allowMultiple": False,
@@ -94,11 +102,11 @@ class Commentlist(Resource):
         ]
     )
     @required_auth
-    @marshal_with(schemes.Eventlist.resource_fields)
-    def get(self):
+    @marshal_with(schemes.CommentList.resource_fields)
+    def get(self, event_id=None):
         "get list event"
         args = comment_get_parser.parse_args()
-        comments_cursor = mongo.db.comments.find({'type': args['type']})
+        comments_cursor = mongo.db.comments.find({'event_id': event_id, 'type': args['type']})
         comments = []
         for comment in comments_cursor:
             user = mongo.db.users.find_one({'_id': ObjectId(comment['user_id'])})
@@ -113,4 +121,4 @@ class Commentlist(Resource):
             comments.append(
                 comment
             )
-        return {'data': comment, 'count': len(comment)}
+        return {'data': comments, 'count': len(comments)}

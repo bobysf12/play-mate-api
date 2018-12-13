@@ -11,7 +11,7 @@ import logging
 import os
 
 app = Flask(__name__, instance_relative_config=True)
-CORS(app)
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 environment = os.getenv('APP_CONFIGURATION', 'development')
 config_file = environment + '.cfg'

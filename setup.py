@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='PlaymateAPI',
-    version='0.1',
+    version='0.1.1',
     long_description=__doc__,
     author="Maulana Yusuf",
     author_email="im.idiiot@gmail.com",

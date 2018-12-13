@@ -172,8 +172,8 @@ class EventCreate(Resource):
             raise FieldRequired(required_field='description')
 
         if args['start_time'] and args['end_time']:
-            start_time = parser.parser(args['start_time'])
-            end_time = parser.parser(args['end_time'])
+            start_time = parser.isoparse(args['start_time'])
+            end_time = parser.isoparse(args['end_time'])
         else:
             start_time = datetime.utcnow()
             end_time = datetime.utcnow() + timedelta(hours=1)
