@@ -116,3 +116,44 @@ class Eventlist(object):
     }
 
     required = ['data']
+
+
+@swagger.model
+class Comment(object):
+    """docstring for CreateUser"""
+
+    resource_fields = {
+        'text': fields.String(),
+        'type': fields.String()
+    }
+
+    required = ['tetx']
+
+
+@swagger.model
+class CommentResponse(object):
+    """docstring for CreateUser"""
+
+    resource_fields = {
+        'text': fields.String(),
+        'type': fields.String(),
+        'created_at': fields.String(),
+        'event_id': fields.String(),
+        'user': fields.Raw()
+    }
+
+    required = []
+
+
+@swagger.model
+@swagger.nested(
+    comment=CommentResponse.__name__)
+class CommentList(object):
+    """docstring for ClassName"""
+
+    resource_fields = {
+        "data": fields.List(fields.Nested(CommentResponse.resource_fields)),
+        'count': fields.Integer()
+    }
+
+    required = ['data']

@@ -1,10 +1,12 @@
 from bson import ObjectId
+from dateutil import parser
+from datetime import datetime, timedelta
 from flask import current_app
 from flask_restful_swagger import swagger
 from flask_restful import Resource, reqparse, marshal_with
 from playmate import mongo
 from playmate import schemes
-from playmate.helpers.decorators import required_auth
+from playmate.helpers.decorators import required_auth, current_user
 from playmate.exceptions import FieldRequired, DataNotfound, AlreadyJoin
 
 event_create_parser = reqparse.RequestParser()
@@ -19,11 +21,12 @@ event_create_parser.add_argument('max_person', type=int)
 event_create_parser.add_argument('status', type=str)
 
 event_get_parser = reqparse.RequestParser()
-event_get_parser.add_argument('start_time', type=str)
-event_get_parser.add_argument('end_time', type=str)
-event_get_parser.add_argument('longitude', type=float)
-event_get_parser.add_argument('latitude', type=float)
-event_get_parser.add_argument('status', type=str)
+event_get_parser.add_argument('start_time', type=str, location='args')
+event_get_parser.add_argument('end_time', type=str, location='args')
+event_get_parser.add_argument('longitude', type=float, location='args')
+event_get_parser.add_argument('latitude', type=float, location='args')
+event_get_parser.add_argument('distance', type=int, default=3000, location='args')
+event_get_parser.add_argument('status', type=str, location='args', default="open")
 
 
 class EventListAPI(Resource):
@@ -87,8 +90,26 @@ class EventListAPI(Resource):
         "get list event"
         args = event_get_parser.parse_args()
         filters = {}
-        if filters:
-            args
+        if args['longitude'] and args['latitude']:
+            filters = {
+                "location": {
+                    "$near": {
+                        "$geometry": {
+                            "type": "Point",
+                            "coordinates": [args['longitude'], args['latitude']]
+                        },
+                        "$maxDistance": args['distance']
+                    }
+                }
+            }
+
+        filters['status'] = args['status']
+
+        if args['start_time'] and args['end_time']:
+            filters['start_time'] = {
+                '$gte': args['start_time'],
+                '$lte': args['end_time']
+            }
 
         events_cursor = mongo.db.events.find(filters)
         events = []
@@ -149,12 +170,20 @@ class EventCreate(Resource):
             raise FieldRequired(required_field='title')
         if args['description'] is None:
             raise FieldRequired(required_field='description')
+
+        if args['start_time'] and args['end_time']:
+            start_time = parser.parser(args['start_time'])
+            end_time = parser.parser(args['end_time'])
+        else:
+            start_time = datetime.utcnow()
+            end_time = datetime.utcnow() + timedelta(hours=1)
+
         doc = {
             'title': args['title'],
             'description': args['description'],
             'location_detail': args['location_detail'],
-            'start_time': args['start_time'],
-            'end_time': args['end_time'],
+            'start_time': start_time,
+            'end_time': end_time,
             'location': {
                 'type': 'Point',
                 'coordinates': [
@@ -163,7 +192,7 @@ class EventCreate(Resource):
                 ]
             },
             'max_person': args['max_person'],
-            # 'creator_id': args['creator_id'],
+            'creator_id': current_user['user_id'],
         }
 
         event = mongo.db.events.insert_one(doc)

@@ -15,10 +15,10 @@ def required_auth(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         session_id = request.headers.get('X-SESSION-ID', None)
-        do_auth = Authentication()
         if session_id is None:
             raise MissingSessionID
 
+        do_auth = Authentication()
         session = do_auth.validate_session(session_id)
 
         ctx = stack.top

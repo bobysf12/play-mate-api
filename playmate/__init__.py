@@ -2,7 +2,7 @@ from flask import Flask, jsonify, request
 from flask_restful import Api
 from flask_restful_swagger import swagger
 from flask_pymongo import PyMongo
-# from flask_fcm import FCM
+from flask_cors import CORS
 from raven.contrib.flask import Sentry
 from playmate.exceptions import BaseExceptions, SessionExpired, MissingSessionID
 from playmate.config import config
@@ -10,8 +10,8 @@ from playmate.config import config
 import logging
 import os
 
-
 app = Flask(__name__, instance_relative_config=True)
+CORS(app)
 
 environment = os.getenv('APP_CONFIGURATION', 'development')
 config_file = environment + '.cfg'
@@ -21,9 +21,6 @@ app.config.from_pyfile(config_file, silent=True)
 api = swagger.docs(Api(app), apiVersion='0.1', api_spec_url='/spec', description="playmate-api")
 sentry = Sentry(app, logging=True, level=logging.ERROR)
 mongo = PyMongo(app)
-# fcm = FCM(app)
-
-# app.config['SQLALCHEMY_ECHO'] = False
 
 
 app.config['SENTRY_CONFIG'] = {
@@ -33,6 +30,7 @@ app.config['SENTRY_CONFIG'] = {
 from playmate.resources.users import RegisterAPI  # noqa: E402
 from playmate.resources.events import EventListAPI, EventCreate, EventDetail, EventJoin, EventLeave, EventClose  # noqa: E402
 from playmate.resources.auth import LoginAPI  # noqa: E402
+from playmate.resources.comments import CommentPost, Commentlist  # noqa: E402
 
 
 # User Register
@@ -44,7 +42,8 @@ api.add_resource(EventDetail, '/event/detail/<string:event_id>')
 api.add_resource(EventJoin, '/event/join/<string:event_id>')
 api.add_resource(EventLeave, '/event/leave/<string:event_id>')
 api.add_resource(EventClose, '/event/close/<string:event_id>')
-# api.add_resource(AuthAPI, '/login')
+api.add_resource(CommentPost, '/event/<string:event_id>/comment/send')
+api.add_resource(Commentlist, '/event/<string:event_id>/comment/list')
 
 
 @app.errorhandler(BaseExceptions)

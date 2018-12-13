@@ -13,9 +13,6 @@ create_user_parser.add_argument('password', type=str)
 create_user_parser.add_argument('name', type=str)
 
 
-STATUS = {'active': 1, 'inactive': 2}
-
-
 class RegisterAPI(Resource):
     """docstring for Users"""
 

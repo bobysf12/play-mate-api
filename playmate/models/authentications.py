@@ -23,9 +23,3 @@ class ForgotPassword(object):
 
     def generate_otp(self, email=None, username=None):
         pass
-        # if email is not None:
-        #     user = get_user_by_email(email)
-        # if username is not None:
-        #     user = get_user_by_username(username)
-        # if user is None:
-        #     raise UnAuthorized

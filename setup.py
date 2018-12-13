@@ -16,8 +16,9 @@ setup(
         'Flask-PyMongo',
         'pymongo',
         'bcrypt',
-        'cloudinary',
         'flask-FCM',
+        'python-dateutil',
+        'flask-cors'
     ],
     dependency_links=[
     ]
