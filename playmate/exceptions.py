@@ -60,6 +60,13 @@ class UserExist(BaseExceptions):
     extra_fields = ['expected_type']
 
 
+class MaxNumberParticipantReached(BaseExceptions):
+    message = "maximum number of participants reached"
+    code = 109
+    status_code = 400
+    extra_fields = ['expected_type']
+
+
 class FieldRequired(BaseExceptions):
     message = "field cannot empty"
     code = 104

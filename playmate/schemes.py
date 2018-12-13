@@ -98,7 +98,8 @@ class EventResponse(object):
         'end_time': fields.String(),
         'location': fields.Raw(),
         'max_person': fields.Integer(),
-        'participants': fields.Raw()
+        'participants': fields.Raw(),
+        'creator_id': fields.String(),
     }
 
     required = ['title', 'longitude', 'latitude', 'max_person']

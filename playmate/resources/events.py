@@ -7,7 +7,7 @@ from flask_restful import Resource, reqparse, marshal_with
 from playmate import mongo
 from playmate import schemes
 from playmate.helpers.decorators import required_auth, current_user
-from playmate.exceptions import FieldRequired, DataNotfound, AlreadyJoin
+from playmate.exceptions import FieldRequired, DataNotfound, AlreadyJoin, MaxNumberParticipantReached
 
 event_create_parser = reqparse.RequestParser()
 event_create_parser.add_argument('title', type=str)
@@ -296,10 +296,14 @@ class EventJoin(Resource):
         "join new event"
         current_event = mongo.db.events.find_one({'_id': ObjectId(event_id)})
         user_id = 1
-        if user_id in current_event.get('participant', []):
+        participants = current_event.get('participant', [])
+        if user_id in participants:
             raise AlreadyJoin
 
-        event = mongo.db.events.update({'_id': ObjectId(event_id)}, {'$set': {'participant': current_event.get('participant', []) + [user_id]}})
+        if len(participants) > current_event['max_person']:
+            raise MaxNumberParticipantReached
+
+        event = mongo.db.events.update({'_id': ObjectId(event_id)}, {'$set': {'participant': participants + [user_id]}})
         current_app.logger.info(event_id)
 
         if event is None:
