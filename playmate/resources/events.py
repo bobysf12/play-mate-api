@@ -18,7 +18,7 @@ event_create_parser.add_argument('end_time', type=str)
 event_create_parser.add_argument('longitude', type=float)
 event_create_parser.add_argument('latitude', type=float)
 event_create_parser.add_argument('max_person', type=int)
-event_create_parser.add_argument('status', type=str)
+event_create_parser.add_argument('status', type=str, default='open')
 
 event_get_parser = reqparse.RequestParser()
 event_get_parser.add_argument('start_time', type=str, location='args')
@@ -74,7 +74,15 @@ class EventListAPI(Resource):
                 "allowMultiple": False,
                 "dataType": "float",
                 "paramType": "query"
-            }
+            },
+            {
+                "name": "status",
+                "description": "",
+                "required": False,
+                "allowMultiple": False,
+                "dataType": "string",
+                "paramType": "query"
+            },
         ],
         responseClass=schemes.Eventlist.__name__,
         responseMessages=[
@@ -110,7 +118,6 @@ class EventListAPI(Resource):
                 '$gte': args['start_time'],
                 '$lte': args['end_time']
             }
-
         events_cursor = mongo.db.events.find(filters)
         events = []
         for event in events_cursor:
@@ -192,6 +199,7 @@ class EventCreate(Resource):
                 ]
             },
             'max_person': args['max_person'],
+            'status': args['status'],
             'creator_id': current_user['user_id'],
         }
 
