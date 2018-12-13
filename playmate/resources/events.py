@@ -27,6 +27,9 @@ event_get_parser.add_argument('longitude', type=float, location='args')
 event_get_parser.add_argument('latitude', type=float, location='args')
 event_get_parser.add_argument('distance', type=int, default=3000, location='args')
 event_get_parser.add_argument('status', type=str, location='args', default="open")
+event_get_parser.add_argument('order', type=str, location='args', default="desc")
+
+DB_ORDER = {'DESC': -1, 'ASC': 1}
 
 
 class EventListAPI(Resource):
@@ -91,6 +94,14 @@ class EventListAPI(Resource):
                 "dataType": "int",
                 "paramType": "query"
             },
+            {
+                "name": "order",
+                "description": "",
+                "required": False,
+                "allowMultiple": False,
+                "dataType": "string",
+                "paramType": "query"
+            },
         ],
         responseClass=schemes.Eventlist.__name__,
         responseMessages=[
@@ -126,7 +137,7 @@ class EventListAPI(Resource):
                 '$gte': parser.isoparse(args['start_time']),
                 '$lte': parser.isoparse(args['end_time'])
             }
-        events_cursor = mongo.db.events.find(filters)
+        events_cursor = mongo.db.events.find(filters).sort([('start_time', DB_ORDER.get(args['order'], -1))])
         events = []
         for event in events_cursor:
             user = mongo.db.users.find_one({'_id': user._id for user in event.get('participants', [])})

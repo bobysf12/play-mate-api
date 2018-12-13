@@ -54,7 +54,7 @@ class CommentPost(Resource):
         "Post comment"
         args = comment_parser.parse_args()
         if args['text'] is None:
-            raise FieldRequired(required_field='password')
+            raise FieldRequired(required_field='text')
 
         doc = {
             'text': args['text'],
@@ -66,7 +66,12 @@ class CommentPost(Resource):
 
         comment = mongo.db.comments.insert_one(doc)
         comment = mongo.db.comments.find_one({'_id': comment.inserted_id})
-        comment['comment_id'] = comment['_id']
+        comment['id'] = comment['_id']
+        comment['user'] = {
+            'user_id': current_user['user_id'],
+            'username': current_user['username'],
+            'name': current_user['name'],
+        }
         return comment, 200
 
 
@@ -110,13 +115,12 @@ class Commentlist(Resource):
         comments = []
         for comment in comments_cursor:
             user = mongo.db.users.find_one({'_id': ObjectId(comment['user_id'])})
-            comment['user'] = [
-                {
-                    'username': user['username'],
-                    'user_id': str(user['_id']),
-                    'name': user['name']
-                }
-            ]
+            comment['user'] = {
+                'username': user['username'],
+                'user_id': str(user['_id']),
+                'name': user['name']
+            }
+
             comment['id'] = str(comment.get('_id'))
             comments.append(
                 comment

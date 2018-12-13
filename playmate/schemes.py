@@ -135,6 +135,7 @@ class CommentResponse(object):
     """docstring for CreateUser"""
 
     resource_fields = {
+        'id': fields.String(),
         'text': fields.String(),
         'type': fields.String(),
         'created_at': fields.String(),
