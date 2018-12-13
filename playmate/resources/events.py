@@ -83,6 +83,14 @@ class EventListAPI(Resource):
                 "dataType": "string",
                 "paramType": "query"
             },
+            {
+                "name": "distance",
+                "description": "",
+                "required": False,
+                "allowMultiple": False,
+                "dataType": "int",
+                "paramType": "query"
+            },
         ],
         responseClass=schemes.Eventlist.__name__,
         responseMessages=[
@@ -115,8 +123,8 @@ class EventListAPI(Resource):
 
         if args['start_time'] and args['end_time']:
             filters['start_time'] = {
-                '$gte': args['start_time'],
-                '$lte': args['end_time']
+                '$gte': parser.isoparse(args['start_time']),
+                '$lte': parser.isoparse(args['end_time'])
             }
         events_cursor = mongo.db.events.find(filters)
         events = []
