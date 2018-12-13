@@ -116,81 +116,18 @@ class UserNotFound(BaseExceptions):
     extra_fields = ['message']
 
 
-class CategoryNotFound(BaseExceptions):
-    message = "Category not found"
-    code = 161
-    status_code = 404
-    extra_fields = []
-
-
-class MallNotFound(BaseExceptions):
-    message = "Mall not found"
-    code = 162
-    status_code = 404
-    extra_fields = []
-
-
-class StoreNotFound(BaseExceptions):
-    message = "Store not found"
-    code = 163
-    status_code = 404
-    extra_fields = []
-
-
-class TenantNotFound(BaseExceptions):
-    message = "Tenant not found"
-    code = 164
-    status_code = 404
-    extra_fields = []
-
-
-class ArticleNotFound(BaseExceptions):
-    message = "Article not found"
-    code = 165
-    status_code = 404
-    extra_fields = []
-
-
-class CampaignNotFound(BaseExceptions):
-    message = "Campaign not found"
-    code = 167
-    status_code = 404
-    extra_fields = []
-
-
-class FileNotFound(BaseExceptions):
-    message = "File not found"
-    code = 166
-    status_code = 404
-    extra_fields = []
-
-
-class PhotoNotFound(BaseExceptions):
-    message = "Photo not found"
-    code = 168
-    status_code = 404
-    extra_fields = []
-
-
-class BannerNotFound(BaseExceptions):
-    message = "Banner not found"
-    code = 169
-    status_code = 404
-    extra_fields = []
-
-
-class FavoritesNotfound(BaseExceptions):
-    message = "There's nothing has favorited yet"
-    code = 170
-    status_code = 404
-    extra_fields = []
-
-
 class DataNotfound(BaseExceptions):
     message = "Data not found"
     code = 171
     status_code = 404
     extra_fields = []
+
+
+class AlreadyJoin(BaseExceptions):
+    message = "User already join"
+    code = 190
+    status_code = 409
+    extra_fields = ['user_id']
 
 
 class EmailConflict(BaseExceptions):
