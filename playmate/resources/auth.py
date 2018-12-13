@@ -1,8 +1,11 @@
-from playmate import mongo
-from playmate.schemes import User
+import md5
+from datetime import datetime
 from flask_restful_swagger import swagger
 from flask_restful import Resource, reqparse, marshal_with
-from playmate.exceptions import FieldRequired
+from playmate import mongo
+from playmate.schemes import Auth, AuthResponse
+from playmate.exceptions import FieldRequired, IncorrectPassword, UserNotFound
+from playmate.helpers.cryptographs import generate_session_id
 
 auth_parser = reqparse.RequestParser()
 auth_parser.add_argument('username', type=str)
@@ -19,11 +22,11 @@ class LoginAPI(Resource):
                 "description": "",
                 "required": True,
                 "allowMultiple": False,
-                "dataType": User.__name__,
+                "dataType": Auth.__name__,
                 "paramType": "body"
             }
         ],
-        responseClass=User.__name__,
+        responseClass=AuthResponse.__name__,
         responseMessages=[
             {
                 "code": 200,
@@ -32,8 +35,7 @@ class LoginAPI(Resource):
             FieldRequired.to_swagger(),
         ]
     )
-    # @required_token
-    @marshal_with(User.resource_fields)
+    @marshal_with(AuthResponse.resource_fields)
     def post(self):
         "Login"
         args = auth_parser.parse_args()
@@ -44,12 +46,25 @@ class LoginAPI(Resource):
 
         user = mongo.db.users.find_one({'username': args['username']})
         if not user:
-            raise Exception()
+            raise UserNotFound
 
-        if args['password'] != user['password']:
-            raise Exception()
+        if md5.new(args['password']).hexdigest() != user['password']:
+            raise IncorrectPassword
 
-        return user, 200
+        session_id = generate_session_id(datetime.utcnow())
+        mongo.db.sessions.insert_one({
+            'user_id': str(user['_id']),
+            'session_id': session_id
+        })
+
+        return {
+            'session_id': session_id,
+            'user': {
+                'username': user['username'],
+                'name': user['name'],
+                'user_id': str(user['_id']),
+            }
+        }, 200
 
 
 class LogoutAPI(Resource):

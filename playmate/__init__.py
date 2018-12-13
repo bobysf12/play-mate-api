@@ -32,9 +32,12 @@ app.config['SENTRY_CONFIG'] = {
 
 from playmate.resources.users import RegisterAPI  # noqa: E402
 from playmate.resources.events import EventListAPI, EventCreate, EventDetail, EventJoin, EventLeave, EventClose  # noqa: E402
+from playmate.resources.auth import LoginAPI  # noqa: E402
+
 
 # User Register
 api.add_resource(RegisterAPI, '/user/create')
+api.add_resource(LoginAPI, '/user/login')
 api.add_resource(EventCreate, '/event/create')
 api.add_resource(EventListAPI, '/event/list')
 api.add_resource(EventDetail, '/event/detail/<string:event_id>')

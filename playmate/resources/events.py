@@ -4,6 +4,7 @@ from flask_restful_swagger import swagger
 from flask_restful import Resource, reqparse, marshal_with
 from playmate import mongo
 from playmate import schemes
+from playmate.helpers.decorators import required_auth
 from playmate.exceptions import FieldRequired, DataNotfound, AlreadyJoin
 
 event_create_parser = reqparse.RequestParser()
@@ -80,7 +81,7 @@ class EventListAPI(Resource):
             },
         ]
     )
-    # @required_auth
+    @required_auth
     @marshal_with(schemes.Eventlist.resource_fields)
     def get(self):
         "get list event"
@@ -92,15 +93,18 @@ class EventListAPI(Resource):
         events_cursor = mongo.db.events.find(filters)
         events = []
         for event in events_cursor:
+            user = mongo.db.users.find_one({'_id': user._id for user in event.get('participants', [])})
             event['participants'] = [
-                mongo.db.users.find_one({'_id': user._id for user in event.get('participants', [])})
+                {
+                    'username': user['username'],
+                    'user_id': str(user['_id']),
+                    'name': user['name']
+                }
             ]
-            event['id'] = event.get('_id')
+            event['id'] = str(event.get('_id'))
             events.append(
                 event
             )
-        # events = [data for data in events_cursor]
-
         return {'data': events, 'count': len(events)}
 
 
@@ -136,7 +140,7 @@ class EventCreate(Resource):
             FieldRequired.to_swagger(),
         ]
     )
-    # @required_token
+    @required_auth
     @marshal_with(schemes.EventResponse.resource_fields)
     def post(self):
         "register new event"
@@ -197,7 +201,7 @@ class EventDetail(Resource):
             }
         ]
     )
-    # @required_token
+    @required_auth
     @marshal_with(schemes.EventResponse.resource_fields)
     def get(self, event_id=None):
         "get new event"
@@ -231,7 +235,7 @@ class EventJoin(Resource):
             }
         ]
     )
-    # @required_token
+    @required_auth
     def put(self, event_id=None):
         "join new event"
         current_event = mongo.db.events.find_one({'_id': ObjectId(event_id)})
@@ -270,7 +274,7 @@ class EventLeave(Resource):
             }
         ]
     )
-    # @required_token
+    @required_auth
     def delete(self, event_id=None):
         "leave new event"
         current_event = mongo.db.events.find_one({'_id': ObjectId(event_id)})
@@ -309,7 +313,7 @@ class EventClose(Resource):
             }
         ]
     )
-    # @required_token
+    @required_auth
     def delete(self, event_id=None):
         "close new event"
         current_event = mongo.db.events.find_one({'_id': ObjectId(event_id)})

@@ -17,6 +17,19 @@ class User(object):
 
 
 @swagger.model
+class UserResponse(object):
+    """docstring for CreateUser"""
+
+    resource_fields = {
+        'user_id': fields.String(),
+        'username': fields.String(),
+        'name': fields.String(),
+    }
+
+    required = ['username', 'password']
+
+
+@swagger.model
 @swagger.nested(
     users=User.__name__)
 class UserList(object):
@@ -28,6 +41,30 @@ class UserList(object):
     }
 
     required = ['data']
+
+
+@swagger.model
+class Auth(object):
+    """docstring for CreateUser"""
+
+    resource_fields = {
+        'username': fields.String(),
+        'password': fields.String(),
+    }
+
+    required = ['username', 'password']
+
+
+@swagger.model
+class AuthResponse(object):
+    """docstring for CreateUser"""
+
+    resource_fields = {
+        'session_id': fields.String(),
+        'user': fields.Raw(),
+    }
+
+    required = ['session_id', 'user']
 
 
 @swagger.model

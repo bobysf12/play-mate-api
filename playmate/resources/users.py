@@ -1,11 +1,10 @@
+import md5
 from flask_restful_swagger import swagger
 from flask_restful import Resource, reqparse, marshal_with
 # from flask import current_app
-# from playmate.helpers.utilities import email_validator, notify_user
-# from playmate.helpers.decorators import required_auth, required_token, current_user, allow_access, check_permission
-from playmate.exceptions import FieldRequired
+from playmate.exceptions import FieldRequired, UserExist
 from playmate import mongo
-from playmate.schemes import User
+from playmate.schemes import User, UserResponse
 
 
 create_user_parser = reqparse.RequestParser()
@@ -24,14 +23,6 @@ class RegisterAPI(Resource):
         notes="""Add user / registered new user""",
         parameters=[
             {
-                "name": "X-SESSION-ID",
-                "description": "",
-                "required": True,
-                "allowMultiple": False,
-                "dataType": "string",
-                "paramType": "header"
-            },
-            {
                 "name": "user",
                 "description": "",
                 "required": True,
@@ -40,7 +31,7 @@ class RegisterAPI(Resource):
                 "paramType": "body"
             }
         ],
-        responseClass=User.__name__,
+        responseClass=UserResponse.__name__,
         responseMessages=[
             {
                 "code": 200,
@@ -49,8 +40,7 @@ class RegisterAPI(Resource):
             FieldRequired.to_swagger(),
         ]
     )
-    # @required_token
-    @marshal_with(User.resource_fields)
+    @marshal_with(UserResponse.resource_fields)
     def post(self):
         "user register"
         args = create_user_parser.parse_args()
@@ -58,13 +48,17 @@ class RegisterAPI(Resource):
             raise FieldRequired(required_field='password')
         if args['name'] is None:
             raise FieldRequired(required_field='name')
+        old_user = mongo.db.users.find_one({'username': args['username']})
+        if old_user and len(old_user) > 0:
+            raise UserExist
+
         doc = {
             'username': args['username'],
             'name': args['name'],
-            'password': args['password'],
+            'password': md5.new(args['password']).hexdigest(),
         }
 
         user = mongo.db.users.insert_one(doc)
         user = mongo.db.users.find_one({'_id': user.inserted_id})
-
+        user['user_id'] = user['_id']
         return user, 200

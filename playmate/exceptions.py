@@ -53,6 +53,13 @@ class UnIndetifiedAtribute(BaseExceptions):
     extra_fields = ['expected_type']
 
 
+class UserExist(BaseExceptions):
+    message = "username already exist"
+    code = 106
+    status_code = 400
+    extra_fields = ['expected_type']
+
+
 class FieldRequired(BaseExceptions):
     message = "field cannot empty"
     code = 104
